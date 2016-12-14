@@ -18,7 +18,7 @@ fi
 
 # Build
 echo "Recreating local directory"
-rm -rf $local_directory
+sudo rm -rf $local_directory
 mkdir $local_directory
 
 echo "Extracting prestashop_$version.zip"
