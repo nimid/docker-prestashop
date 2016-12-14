@@ -34,4 +34,6 @@ else
 	host_source=$PWD/$local_directory
 fi
 
+chmod -R a+rwx $host_source
+
 docker run --name prestashop-$version -d -v $host_source:/var/www/html -p $port:80 prestashop/prestashop:$version
