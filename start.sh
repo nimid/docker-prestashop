@@ -9,23 +9,29 @@ fi
 version=$1
 minor_version=${version:2:1}
 port="${version//./}"
+local_directory=images/$version/prestashop
+local_file=images/$version/prestashop_$version.zip
+
+if [ ! -f $local_file ]; then
+    wget https://www.prestashop.com/download/old/prestashop_$version.zip -O $local_file
+fi
 
 # Build
 echo "Recreating local directory"
-rm -rf images/$version/prestashop/
-mkdir images/$version/prestashop/
+rm -rf $local_directory
+mkdir $local_directory
 
 echo "Extracting prestashop_$version.zip"
-unzip -oq images/$version/prestashop_$version.zip -d images/$version/prestashop
+unzip -oq $local_file -d $local_directory
 
 echo "Building docker image for PrestaShop version $1"
 docker build -t prestashop/prestashop:$version images/$version/.
 
 # Run
 if test $minor_version -lt 7; then
-	host_source=$PWD/images/$version/prestashop/prestashop/
+	host_source=$PWD/$local_directory/prestashop/
 else
-	host_source=$PWD/images/$version/prestashop/
+	host_source=$PWD/$local_directory
 fi
 
 docker run --name prestashop-$version -d -v $host_source:/var/www/html -p $port:80 prestashop/prestashop:$version
