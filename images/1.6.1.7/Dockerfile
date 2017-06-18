@@ -1,9 +1,9 @@
 FROM php:5.6-apache
 
-MAINTAINER Thomas Nabord <thomas.nabord@prestashop.com>
+MAINTAINER Saroj Saengphongumphai <ss.saroj@gmail.com>
 
 ENV PS_DOMAIN <to be defined>
-ENV DB_SERVER <to be defined>
+ENV DB_SERVER 127.0.0.1
 ENV DB_PORT 3306
 ENV DB_NAME prestashop
 ENV DB_USER root
@@ -43,7 +43,7 @@ RUN docker-php-source extract \
 ENV PS_VERSION 1.6.1.7
 
 # Get PrestaShop
-ADD https://www.prestashop.com/download/old/prestashop_1.6.1.7.zip /tmp/prestashop.zip
+ADD prestashop_1.6.1.7.zip /tmp/prestashop.zip
 COPY config_files/ps-extractor.sh /tmp/
 RUN mkdir /tmp/data-ps && unzip -q /tmp/prestashop.zip -d /tmp/data-ps/ && bash /tmp/ps-extractor.sh /tmp/data-ps && rm /tmp/prestashop.zip
 COPY config_files/docker_updt_ps_domains.php /var/www/html/
@@ -55,9 +55,11 @@ RUN chown www-data:www-data -R /var/www/html/
 # PHP configuration
 COPY config_files/php.ini /usr/local/etc/php/
 
-VOLUME /var/www/html/modules
-VOLUME /var/www/html/themes
-VOLUME /var/www/html/override
+# MySQL configuration
+RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
+EXPOSE 3306
+
+ADD prestashop/prestashop/ /var/www/html/
 
 COPY config_files/docker_run.sh /tmp/
 CMD ["/tmp/docker_run.sh"]
