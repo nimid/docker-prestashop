@@ -1,9 +1,9 @@
 FROM php:5.6-apache
 
-MAINTAINER Thomas Nabord <thomas.nabord@prestashop.com>
+MAINTAINER Saroj Saengphongumphai <ss.saroj@gmail.com>
 
 ENV PS_DOMAIN <to be defined>
-ENV DB_SERVER <to be defined>
+ENV DB_SERVER 127.0.0.1
 ENV DB_PORT 3306
 ENV DB_NAME prestashop
 ENV DB_USER root
@@ -20,32 +20,32 @@ ENV PS_HANDLE_DYNAMIC_DOMAIN 0
 ENV PS_FOLDER_ADMIN admin
 ENV PS_FOLDER_INSTALL install
 
+
+# Avoid MySQL questions during installation
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo mysql-server-5.6 mysql-server/root_password password $DB_PASSWD | debconf-set-selections
+RUN echo mysql-server-5.6 mysql-server/root_password_again password $DB_PASSWD | debconf-set-selections
+
 RUN apt-get update \
 	&& apt-get install -y libmcrypt-dev \
 		libjpeg62-turbo-dev \
-		libpcre3-dev \
 		libpng12-dev \
 		libfreetype6-dev \
 		libxml2-dev \
-		libicu-dev \
 		mysql-client \
+		mysql-server \
 		wget \
 		unzip \
     && rm -rf /var/lib/apt/lists/* \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install iconv intl mcrypt pdo pdo_mysql mbstring soap gd zip
-
-RUN docker-php-source extract \
-	&& if [ -d "/usr/src/php/ext/mysql" ]; then docker-php-ext-install mysql; fi \
-	&& if [ -d "/usr/src/php/ext/opcache" ]; then docker-php-ext-install opcache; fi \
-	&& docker-php-source delete
+    && docker-php-ext-install iconv mcrypt opcache pdo mysql pdo_mysql mbstring soap gd zip
 
 ENV PS_VERSION 1.6.1.6
 
 # Get PrestaShop
-ADD https://www.prestashop.com/download/old/prestashop_1.6.1.6.zip /tmp/prestashop.zip
+ADD prestashop_1.6.1.6.zip /tmp/prestashop.zip
 COPY config_files/ps-extractor.sh /tmp/
-RUN mkdir /tmp/data-ps && unzip -q /tmp/prestashop.zip -d /tmp/data-ps/ && bash /tmp/ps-extractor.sh /tmp/data-ps && rm /tmp/prestashop.zip
+RUN mkdir /tmp/data-ps && unzip -q /tmp/prestashop.zip -d /tmp/data-ps/ && bash /tmp/ps-extractor.sh /tmp/data-ps && rm /tmp/prestashop.zip /tmp/ps-extractor.sh
 COPY config_files/docker_updt_ps_domains.php /var/www/html/
 
 # Apache configuration
@@ -55,9 +55,11 @@ RUN chown www-data:www-data -R /var/www/html/
 # PHP configuration
 COPY config_files/php.ini /usr/local/etc/php/
 
-VOLUME /var/www/html/modules
-VOLUME /var/www/html/themes
-VOLUME /var/www/html/override
+# MySQL configuration
+RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
+EXPOSE 3306
+
+ADD prestashop/prestashop/ /var/www/html/
 
 COPY config_files/docker_run.sh /tmp/
 CMD ["/tmp/docker_run.sh"]
