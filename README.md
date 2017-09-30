@@ -4,8 +4,6 @@
 $ ./start.sh [version of PrestaShop]
 ```
 
-e.g.:
-
 ```
 $ ./start.sh 1.7.0.2
 ```

@@ -1,5 +1,4 @@
 FROM php:5.6-apache
-
 MAINTAINER Saroj Saengphongumphai <ss.saroj@gmail.com>
 
 ENV PS_DOMAIN <to be defined>
@@ -19,7 +18,6 @@ ENV PS_HANDLE_DYNAMIC_DOMAIN 0
 
 ENV PS_FOLDER_ADMIN admin
 ENV PS_FOLDER_INSTALL install
-
 
 # Avoid MySQL questions during installation
 ENV DEBIAN_FRONTEND noninteractive
@@ -50,7 +48,6 @@ COPY config_files/docker_updt_ps_domains.php /var/www/html/
 
 # Apache configuration
 RUN a2enmod rewrite
-RUN chown www-data:www-data -R /var/www/html/
 
 # PHP configuration
 COPY config_files/php.ini /usr/local/etc/php/
