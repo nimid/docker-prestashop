@@ -43,7 +43,7 @@ RUN docker-php-source extract \
 ENV PS_VERSION 1.7.2.2
 
 # Get PrestaShop
-ADD https://www.prestashop.com/download/old/prestashop_1.7.2.2.zip /tmp/prestashop.zip
+ADD prestashop_1.7.2.2.zip /tmp/prestashop.zip
 
 # Prepare install and CMD script
 COPY config_files/ps-extractor.sh config_files/docker_run.sh /tmp/
@@ -60,6 +60,12 @@ RUN a2enmod rewrite
 
 # PHP configuration
 COPY config_files/php.ini /usr/local/etc/php/
+
+# MySQL configuration
+RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
+EXPOSE 3306
+
+ADD prestashop/prestashop/ /var/www/html/
 
 # Run
 CMD ["/tmp/docker_run.sh"]
