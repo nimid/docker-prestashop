@@ -24,8 +24,11 @@ DEBIAN_FRONTEND=noninteractive
 RUN echo "mysql-server mysql-server/root_password password admin" | debconf-set-selections
 RUN echo "mysql-server mysql-server/root_password_again password admin" | debconf-set-selections
 
-RUN apt-get update \
-	&& apt-get install -y libmcrypt-dev \
+RUN apt-get update
+
+RUN apt-get install -y mysql-server
+
+RUN apt-get install -y libmcrypt-dev \
 		libjpeg62-turbo-dev \
 		libpcre3-dev \
 		libpng12-dev \
@@ -33,7 +36,6 @@ RUN apt-get update \
 		libxml2-dev \
 		libicu-dev \
 		mysql-client \
-		mysql-server \
 		wget \
 		unzip \
     && rm -rf /var/lib/apt/lists/* \

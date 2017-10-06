@@ -76,7 +76,8 @@ else
     echo "\n* Pretashop Core already installed...";
 fi
 
-service mysql start
+find /var/lib/mysql -type f -exec touch {} \;
+service mysql restart
 
 echo "\n* Almost ! Starting Apache now\n";
 exec apache2-foreground
