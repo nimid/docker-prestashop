@@ -76,5 +76,7 @@ else
     echo "\n* Pretashop Core already installed...";
 fi
 
+service mysql start
+
 echo "\n* Almost ! Starting Apache now\n";
 exec apache2-foreground

@@ -1,8 +1,8 @@
 FROM php:5.6-apache
-LABEL maintainer="Thomas Nabord <thomas.nabord@prestashop.com>"
+LABEL maintainer="Saroj Sangphongamphai <ss.saroj@gmail.com>"
 
-ENV PS_DOMAIN="<to be defined>" \
-DB_SERVER="<to be defined>" \
+ENV PS_DOMAIN="localhost" \
+DB_SERVER="localhost" \
 DB_PORT=3306 \
 DB_NAME=prestashop \
 DB_USER=root \
@@ -18,7 +18,14 @@ PS_DEV_MODE=0 \
 PS_HOST_MODE=0 \
 PS_HANDLE_DYNAMIC_DOMAIN=0 \
 PS_FOLDER_ADMIN=admin \
-PS_FOLDER_INSTALL=install
+PS_FOLDER_INSTALL=install \
+DEBIAN_FRONTEND=noninteractive
+
+RUN echo "mysql-server mysql-server/root_password password admin" | debconf-set-selections
+RUN echo "mysql-server mysql-server/root_password_again password admin" | debconf-set-selections
+
+RUN apt-get update \
+	&& apt-get install -y mysql-server
 
 RUN apt-get update \
 	&& apt-get install -y libmcrypt-dev \
@@ -64,8 +71,6 @@ COPY config_files/php.ini /usr/local/etc/php/
 # MySQL configuration
 RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
 EXPOSE 3306
-
-ADD prestashop/prestashop/ /var/www/html/
 
 # Run
 CMD ["/tmp/docker_run.sh"]
